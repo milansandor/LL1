@@ -11,25 +11,25 @@ using namespace std;
 map<char, vector<string>> GRAMMAR;          
 map<char, set<char>> FIRST;                 
 map<char, set<char>> FOLLOW;                
-set<char> nonTerminalSymbol;                
-set<char> terminalSymbol;                   
+set<char> nemTerminalisSzimbolum;                
+set<char> terminalisSzimbolum;                   
 map<char, bool> toEpsilon;                  
-map<string, vector<string>> analysisTable;                 
-bool judge_LL1_third = false;               
-char startNonTerminalChar;                  
-string expressionStr;                      
-bool analysisResult = true;                 
+map<string, vector<string>> analizisTabla;                 
+bool LL1_harmadik_vizsgalata = false;               
+char kezdoNemTerminalisChar;                  
+string kifejezesString;                      
+bool analizisEredmenye = true;                 
 
 void getFIRST() {   
     bool update = true;
     while (update) {
         update = false;
-        for (char nonTerminalChar : nonTerminalSymbol) { 
-            int firstSize = FIRST[nonTerminalChar].size();
-            for (string rightSide : GRAMMAR[nonTerminalChar]) {  
-                for (char ch : rightSide) {     
+        for (char nemTerminalisChar : nemTerminalisSzimbolum) { 
+            int firstSize = FIRST[nemTerminalisChar].size();
+            for (string jobbOldal : GRAMMAR[nemTerminalisChar]) {  
+                for (char ch : jobbOldal) {     
                     if (!isupper(ch)) {     
-                        FIRST[nonTerminalChar].insert(ch);  
+                        FIRST[nemTerminalisChar].insert(ch);  
                         break;      
                     } else {
                         bool flag = false;      
@@ -37,7 +37,7 @@ void getFIRST() {
                             if (temp == '@') {
                                 flag = true;
                             }
-                            FIRST[nonTerminalChar].insert(temp);
+                            FIRST[nemTerminalisChar].insert(temp);
                         }
                         if (!flag) {        
                             break;
@@ -45,13 +45,13 @@ void getFIRST() {
                     }
                 }
             }
-            if (firstSize != FIRST[nonTerminalChar].size()) {
+            if (firstSize != FIRST[nemTerminalisChar].size()) {
                 update = true;
             }
         }
     }
-    for (char nonTerminalChar: nonTerminalSymbol) {
-        toEpsilon[nonTerminalChar] = FIRST[nonTerminalChar].find('@') != FIRST[nonTerminalChar].end();
+    for (char nemTerminalisChar: nemTerminalisSzimbolum) {
+        toEpsilon[nemTerminalisChar] = FIRST[nemTerminalisChar].find('@') != FIRST[nemTerminalisChar].end();
     }
 }
 
@@ -59,47 +59,47 @@ void getFOLLOW() {
     bool update = true;
     while (update) {
         update = false;
-        for (char nonTerminalChar : nonTerminalSymbol) { 
-            int followSize = FOLLOW[nonTerminalChar].size();    
+        for (char nemTerminalisChar : nemTerminalisSzimbolum) { 
+            int followSize = FOLLOW[nemTerminalisChar].size();    
             for (auto iter = GRAMMAR.begin(); iter != GRAMMAR.end(); iter++) {      
-                for (string rightSide : iter->second) {      
+                for (string jobbOldal : iter->second) {      
                     int i = 0;
-                    while (i < rightSide.length()) {    
-                        for (; i < rightSide.length(); i++) {
-                            if (nonTerminalChar == rightSide[i]) {  
-                                if (i == rightSide.length() - 1) { 
+                    while (i < jobbOldal.length()) {    
+                        for (; i < jobbOldal.length(); i++) {
+                            if (nemTerminalisChar == jobbOldal[i]) {  
+                                if (i == jobbOldal.length() - 1) { 
                                     for (char ch : FOLLOW[iter->first]) {   
-                                        FOLLOW[nonTerminalChar].insert(ch);
+                                        FOLLOW[nemTerminalisChar].insert(ch);
                                     }
                                 }
                                 i++;
                                 break;  
                             }
                         }
-                        for (; i < rightSide.length(); i++) {   
-                            if (!isupper(rightSide[i])) {   
-                                FOLLOW[nonTerminalChar].insert(
-                                        rightSide[i]);   
+                        for (; i < jobbOldal.length(); i++) {   
+                            if (!isupper(jobbOldal[i])) {   
+                                FOLLOW[nemTerminalisChar].insert(
+                                        jobbOldal[i]);   
                                 break;      
                             } else {        
-                                for (char ch : FIRST[rightSide[i]]) {   
+                                for (char ch : FIRST[jobbOldal[i]]) {   
                                     if (ch != '@') {
-                                        FOLLOW[nonTerminalChar].insert(ch);
+                                        FOLLOW[nemTerminalisChar].insert(ch);
                                     }
                                 }
-                                if (!toEpsilon[rightSide[i]]) {     
+                                if (!toEpsilon[jobbOldal[i]]) {     
                                     break;
-                                } else if (i == rightSide.length() - 1) {        
+                                } else if (i == jobbOldal.length() - 1) {        
                                     for (char ch : FOLLOW[iter->first]) {
-                                        FOLLOW[nonTerminalChar].insert(
+                                        FOLLOW[nemTerminalisChar].insert(
                                                 ch);     
                                     }
                                 }
                             }
-                            if (i == rightSide.length() - 1 &&
-                                rightSide[i] == nonTerminalChar) { 
+                            if (i == jobbOldal.length() - 1 &&
+                                jobbOldal[i] == nemTerminalisChar) { 
                                 for (char ch : FOLLOW[iter->first]) {
-                                    FOLLOW[nonTerminalChar].insert(
+                                    FOLLOW[nemTerminalisChar].insert(
                                             ch); 
                                 }
                             }
@@ -107,7 +107,7 @@ void getFOLLOW() {
                     }
                 }
             }
-            if (followSize != FOLLOW[nonTerminalChar].size()) {
+            if (followSize != FOLLOW[nemTerminalisChar].size()) {
                 update = true;
             }
         }
@@ -116,7 +116,7 @@ void getFOLLOW() {
 
 void printFIRST() {     
     cout << "First: " << endl;
-    for (char chr : nonTerminalSymbol) {
+    for (char chr : nemTerminalisSzimbolum) {
         cout << chr << ": ";
         set<char> first;
         first = FIRST[chr];
@@ -130,7 +130,7 @@ void printFIRST() {
 
 void printFOLLOW() {    
     cout << "Follow: " << endl;
-    for (char chr : nonTerminalSymbol) {
+    for (char chr : nemTerminalisSzimbolum) {
         cout << chr << ": ";
         set<char> follow;
         follow = FOLLOW[chr];
@@ -142,7 +142,7 @@ void printFOLLOW() {
     cout << endl;
 }
 
-void init() {   
+void beolvasas() {   
     ifstream stream;
     stream.open("grammar.txt");
     if (!stream.is_open()) {
@@ -150,7 +150,7 @@ void init() {
         exit(EXIT_FAILURE);
     }
     string temp;
-    bool isFirstNonTerminalChar = true;
+    bool FirstNemTerminalisChar = true;
     cout << "Szabályok:" << endl;
     while (getline(stream, temp)) {
         int nPos = 0;
@@ -158,28 +158,28 @@ void init() {
             temp.replace(nPos, 1, "");
         }
         GRAMMAR[temp[0]].push_back(temp.substr(3));
-        if (isFirstNonTerminalChar) {
+        if (FirstNemTerminalisChar) {
             FOLLOW[temp[0]].insert('$');
-            startNonTerminalChar = temp[0];
-            isFirstNonTerminalChar = false;
+            kezdoNemTerminalisChar = temp[0];
+            FirstNemTerminalisChar = false;
         }
-        nonTerminalSymbol.insert(temp[0]);      
+        nemTerminalisSzimbolum.insert(temp[0]);      
         for (int i = 3; i < temp.length(); i++) {
             if (!isupper(temp[i]) && temp[i] != '@') {
-                terminalSymbol.insert(temp[i]);     
+                terminalisSzimbolum.insert(temp[i]);     
             }
         }
         cout << temp << endl;
     }
     cout << endl;
     cout << "Nem terminális: " << endl;
-    for (char nonTerminalChar:nonTerminalSymbol) {
-        cout << nonTerminalChar << " ";
+    for (char nemTerminalisChar:nemTerminalisSzimbolum) {
+        cout << nemTerminalisChar << " ";
     }
     cout << endl << endl;
     cout << "Terminális: " << endl;
-    for (char terminalChar : terminalSymbol) {
-        cout << terminalChar << " ";
+    for (char terminalisChar : terminalisSzimbolum) {
+        cout << terminalisChar << " ";
     }
     cout << endl << endl;
     stream.close();
@@ -188,7 +188,7 @@ void init() {
         cout << "Nem lehet megnyitni: expression.txt" << endl;
         exit(EXIT_FAILURE);
     }
-    stream >> expressionStr;
+    stream >> kifejezesString;
     stream.close();
 }
 
@@ -196,7 +196,7 @@ set<char> getRightFirst(string ss) {
     set<char> s;
     bool flag = false;
     if (ss == "@") {
-        judge_LL1_third = true;
+        LL1_harmadik_vizsgalata = true;
     }
     for (char c : ss) {
         flag = false;
@@ -218,29 +218,29 @@ set<char> getRightFirst(string ss) {
         }
     }
     if (flag) {
-        judge_LL1_third = true;
+        LL1_harmadik_vizsgalata = true;
     }
     return s;
 }
 
-void createAnalysisTable() {
+void createAnalizisTabla() {
     for (auto iter = GRAMMAR.begin(); iter != GRAMMAR.end(); iter++) {      
-        for (string rightSide : iter->second) {     
-            set<char> rightSideFirst = getRightFirst(rightSide);    
-            for (char first : rightSideFirst) {     
+        for (string jobbOldal : iter->second) {     
+            set<char> jobbOldalFirst = getRightFirst(jobbOldal);    
+            for (char first : jobbOldalFirst) {     
                 if (first == '@') {     
                     for (char follow : FOLLOW[iter->first]) {   
                         string temp;
                         temp.push_back(iter->first);
                         temp.push_back(follow);
-                        if (analysisTable.find(temp) == analysisTable.end()) {   
+                        if (analizisTabla.find(temp) == analizisTabla.end()) {   
                             string temp2;
                             temp2.push_back(iter->first);
-                            analysisTable[temp].push_back(temp2);
-                            for (char ch : rightSide) {
+                            analizisTabla[temp].push_back(temp2);
+                            for (char ch : jobbOldal) {
                                 temp2.clear();
                                 temp2.push_back(ch);
-                                analysisTable[temp].push_back(temp2);
+                                analizisTabla[temp].push_back(temp2);
                             }
                         } else {    
                             cout << "Analizált tábla készítése sikertelen!" << endl;
@@ -252,14 +252,14 @@ void createAnalysisTable() {
                 string temp;
                 temp.push_back(iter->first);
                 temp.push_back(first);
-                if (analysisTable.find(temp) == analysisTable.end()) {   
+                if (analizisTabla.find(temp) == analizisTabla.end()) {   
                     string temp2;
                     temp2.push_back(iter->first);
-                    analysisTable[temp].push_back(temp2);
-                    for (char ch : rightSide) {
+                    analizisTabla[temp].push_back(temp2);
+                    for (char ch : jobbOldal) {
                         temp2.clear();
                         temp2.push_back(ch);
-                        analysisTable[temp].push_back(temp2);
+                        analizisTabla[temp].push_back(temp2);
                     }
                 } else {    
                     cout << "Analizált tábla készítése sikertelen!" << endl;
@@ -268,50 +268,50 @@ void createAnalysisTable() {
             }
         }
     }
-    for (char nonTerminalChar : nonTerminalSymbol) {        
-        for (char follow : FOLLOW[nonTerminalChar]) {
+    for (char nemTerminalisChar : nemTerminalisSzimbolum) {        
+        for (char follow : FOLLOW[nemTerminalisChar]) {
             string temp;
-            temp.push_back(nonTerminalChar);
+            temp.push_back(nemTerminalisChar);
             temp.push_back(follow);
-            if (analysisTable.find(temp) == analysisTable.end()) {
-                analysisTable[temp].push_back("synch");
+            if (analizisTabla.find(temp) == analizisTabla.end()) {
+                analizisTabla[temp].push_back("synch");
             }
         }
     }
 }
 
-void printAnalysisTable() {
-    set<char> terminalSymbolWithDollor = terminalSymbol;
-    terminalSymbolWithDollor.insert('$');
+void printAnalizisTabla() {
+    set<char> terminalisSzimbolumDollar = terminalisSzimbolum;
+    terminalisSzimbolumDollar.insert('$');
     cout << " ";
-    for (char terminalChar : terminalSymbolWithDollor) {
+    for (char terminalisChar : terminalisSzimbolumDollar) {
         string temp = "";
-        temp += terminalChar;
-        cout << terminalChar << " ";
+        temp += terminalisChar;
+        cout << terminalisChar << " ";
     }
     cout << "\n";
     
-    for (char nonTerminalChar :nonTerminalSymbol) {
-        cout << nonTerminalChar << ":" << " ";
-        for (char terminalChar : terminalSymbolWithDollor) {
+    for (char nemTerminalisChar :nemTerminalisSzimbolum) {
+        cout << nemTerminalisChar << ":" << " ";
+        for (char terminalisChar : terminalisSzimbolumDollar) {
             string temp = "";
-            temp += nonTerminalChar;
-            temp += terminalChar;
-            auto iter = analysisTable.find(temp);
-            if (iter != analysisTable.end()) {
-                string expressionStr = "";
+            temp += nemTerminalisChar;
+            temp += terminalisChar;
+            auto iter = analizisTabla.find(temp);
+            if (iter != analizisTabla.end()) {
+                string kifejezesString = "";
                 if (iter->second.size() == 1 && *iter->second.begin() == "synch") {
-                    expressionStr = "synch";
+                    kifejezesString = "synch";
                 } else {
-                    expressionStr += nonTerminalChar;
-                    expressionStr += "->";
+                    kifejezesString += nemTerminalisChar;
+                    kifejezesString += "->";
                     auto iter2 = iter->second.begin();
                     iter2++;
                     for (; iter2 != iter->second.end(); iter2++) {
-                        expressionStr += *iter2;
+                        kifejezesString += *iter2;
                     }
                 }
-                cout << expressionStr << " | ";
+                cout << kifejezesString << " | ";
             } else {
                 cout << " - " << " | ";
             }
@@ -322,100 +322,100 @@ void printAnalysisTable() {
 
 void analysis() {
     
-    vector<string> analysisStack;
+    vector<string> analizisStack;
     
-    analysisStack.push_back("$");
+    analizisStack.push_back("$");
     string temp;
-    temp.push_back(startNonTerminalChar);
-    analysisStack.push_back(temp);
+    temp.push_back(kezdoNemTerminalisChar);
+    analizisStack.push_back(temp);
     int index = 0;  
-    string printStack = "";
-    string printInput = "";
-    string printAction = "";
-    while (analysisStack.back() != "$") {
-        for (string stackStr : analysisStack) {     
-            printStack += stackStr;
+    string StackKiirasa = "";
+    string InputKiirasa = "";
+    string ActionKiirasa = "";
+    while (analizisStack.back() != "$") {
+        for (string stackStr : analizisStack) {     
+            StackKiirasa += stackStr;
         }
-        for (int i = index; i < expressionStr.size(); i++) {
-            printInput += expressionStr[i];
+        for (int i = index; i < kifejezesString.size(); i++) {
+            InputKiirasa += kifejezesString[i];
         }
         
-        //cout << "stack: " << printStack << " input: " << printInput << " ";
-        printStack = "";
-        printInput = "";
-        printAction = "";
+        //cout << "stack: " << StackKiirasa << " input: " << InputKiirasa << " ";
+        StackKiirasa = "";
+        InputKiirasa = "";
+        ActionKiirasa = "";
         string a;
-        a.push_back(expressionStr[index]);
+        a.push_back(kifejezesString[index]);
         temp.clear();
-        temp = analysisStack.back() + a;
-        auto iter = analysisTable.find(temp);
-        if (analysisStack.back() == a) {   
-            printAction += ("Match " + a);
-            analysisStack.pop_back();   
+        temp = analizisStack.back() + a;
+        auto iter = analizisTabla.find(temp);
+        if (analizisStack.back() == a) {   
+            ActionKiirasa += ("Match " + a);
+            analizisStack.pop_back();   
             index++;       
-        } else if (!isupper(analysisStack.back()[0])) {     
-            printAction =
-                    "Hiba az indexen " + to_string(index) + ", Stack top != " + a + ", pop " + analysisStack.back();
-            analysisResult = false;
-            analysisStack.pop_back();
-        } else if (iter == analysisTable.end()) {   
+        } else if (!isupper(analizisStack.back()[0])) {     
+            ActionKiirasa =
+                    "Hiba az indexen " + to_string(index) + ", Stack top != " + a + ", pop " + analizisStack.back();
+            analizisEredmenye = false;
+            analizisStack.pop_back();
+        } else if (iter == analizisTabla.end()) {   
             index++;
-            printAction = "Hiba az indexen " + to_string(index) + ", ugrás " + a;
-            analysisResult = false;
-        } else if (iter != analysisTable.end()) {   
+            ActionKiirasa = "Hiba az indexen " + to_string(index) + ", ugrás " + a;
+            analizisEredmenye = false;
+        } else if (iter != analizisTabla.end()) {   
             vector<string> tempVector = iter->second;
             if (tempVector.size() == 1 && tempVector[0] == "synch") {   
-                printAction = "Hiba az indexen " + to_string(index) + ", " + a + " ebben van benne " + analysisStack.back() +
-                              " synch, pop " + analysisStack.back();
-                analysisResult = false;
-                analysisStack.pop_back();
+                ActionKiirasa = "Hiba az indexen " + to_string(index) + ", " + a + " ebben van benne " + analizisStack.back() +
+                              " synch, pop " + analizisStack.back();
+                analizisEredmenye = false;
+                analizisStack.pop_back();
             } else {
                 
-                printAction += "output: ";
-                printAction += (tempVector[0] + " -> ");
+                ActionKiirasa += "output: ";
+                ActionKiirasa += (tempVector[0] + " -> ");
                 for (int i = 1; i < tempVector.size(); i++) {
-                    printAction += tempVector[i];
+                    ActionKiirasa += tempVector[i];
                 }
-                analysisStack.pop_back();       
+                analizisStack.pop_back();       
                 for (int i = tempVector.size() - 1; i >= 1; i--) {
                     if (tempVector[i] != "@") {
-                        analysisStack.push_back(tempVector[i]);     
+                        analizisStack.push_back(tempVector[i]);     
                     }
                 }
             }
         }
         
-        //cout << printAction << "\n";
+        //cout << ActionKiirasa << "\n";
     }
-    for (int i = index; i < expressionStr.length() - 1; i++) {  
+    for (int i = index; i < kifejezesString.length() - 1; i++) {  
         //cout << "$";
         string temp;
-        for (int j = i; j < expressionStr.length(); j++) {
-            temp.push_back(expressionStr[j]);
+        for (int j = i; j < kifejezesString.length(); j++) {
+            temp.push_back(kifejezesString[j]);
         }
         //cout << temp;
         temp.clear();
         temp.append("Hiba az indexen " + to_string(i) + ", ugrás ");
-        temp.push_back(expressionStr[i]);
+        temp.push_back(kifejezesString[i]);
         //cout << temp;
-        analysisResult = false;
+        analizisEredmenye = false;
     }
     //cout << "$" << "$" << "\n";
 }
 
 int main(int argc, char **argv) {
-    init();
+    beolvasas();
     getFIRST();     
     getFOLLOW();    
     printFIRST();
     printFOLLOW();
-    createAnalysisTable();
-    printAnalysisTable();
+    createAnalizisTabla();
+    printAnalizisTabla();
     analysis();
-    if (analysisResult) {
-        cout << expressionStr << " jó a string." << endl;
+    if (analizisEredmenye) {
+        cout << kifejezesString << " jó a string." << endl;
     } else {
-        cout << expressionStr << " nem jó a string." << endl;
+        cout << kifejezesString << " nem jó a string." << endl;
     }
     return 0;
     
